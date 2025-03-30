@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -Wl,--gc-sections -shared  -o DynamicPass.so CMakeFiles/DynamicPass.dir/Pass.cpp.o  -Wl,-rpath,"\$ORIGIN/../lib:" 
