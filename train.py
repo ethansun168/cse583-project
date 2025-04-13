@@ -25,19 +25,19 @@ class LoopPragmaDataset(Dataset):
         y = torch.tensor(self.labels[idx], dtype=torch.long)  # long for classification
         return x, y
 
-def parse_pragma(pragma_str):
-    """
-    Extracts pragma fields from a string like:
-    "#pragma omp parallel for collapse(2) schedule(static, 4)"
-    """
-    collapse = re.search(r'collapse\((\d+)\)', pragma_str)
-    schedule = re.search(r'schedule\((\w+),\s*(\d+)\)', pragma_str)
+# def parse_pragma(pragma_str):
+#     """
+#     Extracts pragma fields from a string like:
+#     "#pragma omp parallel for collapse(2) schedule(static, 4)"
+#     """
+#     collapse = re.search(r'collapse\((\d+)\)', pragma_str)
+#     schedule = re.search(r'schedule\((\w+),\s*(\d+)\)', pragma_str)
     
-    return {
-        'collapse': int(collapse.group(1)) if collapse else 1,
-        'schedule_type': schedule.group(1) if schedule else 'static',
-        'chunk_size': int(schedule.group(2)) if schedule else 1
-    }
+#     return {
+#         'collapse': int(collapse.group(1)) if collapse else 1,
+#         'schedule_type': schedule.group(1) if schedule else 'static',
+#         'chunk_size': int(schedule.group(2)) if schedule else 1
+#     }
 
 def extract_features_from_example(example):
     static = example.get('static_analysis', [])
@@ -183,4 +183,12 @@ if __name__ == '__main__':
     logger = logging.getLogger()
 
     train(args, train_dataset, model)
+    
+    # Save the entire model (less recommended)
+    # torch.save(model, 'model_full.pth')
+
+    # Save only the model weights (recommended)
+    torch.save(model.state_dict(), 'model_weights.pth')
+
+    logger.info("Model saved successfully.")
 
