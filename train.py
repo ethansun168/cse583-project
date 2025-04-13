@@ -183,9 +183,6 @@ if __name__ == '__main__':
     logger = logging.getLogger()
 
     train(args, train_dataset, model)
-    
-    # Save the entire model (less recommended)
-    # torch.save(model, 'model_full.pth')
 
     # Save only the model weights (recommended)
     torch.save(model.state_dict(), 'model_weights.pth')

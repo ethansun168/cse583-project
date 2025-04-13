@@ -13,3 +13,7 @@ $ pip install -r requirements.txt
 ```
 $ python3 train.py
 ```
+# Run Tests
+```
+$ python3 run.py
+```
