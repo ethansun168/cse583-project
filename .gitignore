@@ -1,0 +1,8 @@
+database.tar.xz
+database
+env
+__pycache__
+OMPar/OMPify/model.bin
+Dynamic/build/
+*.pyc
+__pycache__/

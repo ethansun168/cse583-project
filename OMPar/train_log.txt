@@ -1,0 +1,67 @@
+Grouped Split: 2667 training samples, 685 validation samples.
+Grouped Split: 2758 training samples, 594 validation samples.
+Epoch 1/20 - Average Loss: 0.6616
+Evaluation accuracy after epoch 1: 56.96%
+Checkpoint saved to OMPify/checkpoint_epoch_1.bin
+Epoch 2/20 - Average Loss: 0.5640
+Evaluation accuracy after epoch 2: 57.58%
+Checkpoint saved to OMPify/checkpoint_epoch_2.bin
+Epoch 3/20 - Average Loss: 0.5545
+Evaluation accuracy after epoch 3: 57.58%
+Checkpoint saved to OMPify/checkpoint_epoch_3.bin
+Epoch 4/20 - Average Loss: 0.5497
+Evaluation accuracy after epoch 4: 57.63%
+Checkpoint saved to OMPify/checkpoint_epoch_4.bin
+Epoch 5/20 - Average Loss: 0.5435
+Evaluation accuracy after epoch 5: 57.52%
+Checkpoint saved to OMPify/checkpoint_epoch_5.bin
+Epoch 6/20 - Average Loss: 0.5411
+Evaluation accuracy after epoch 6: 58.36%
+Checkpoint saved to OMPify/checkpoint_epoch_6.bin
+Epoch 7/20 - Average Loss: 0.5354
+Evaluation accuracy after epoch 7: 58.59%
+Checkpoint saved to OMPify/checkpoint_epoch_7.bin
+Epoch 8/20 - Average Loss: 0.5317
+Evaluation accuracy after epoch 8: 59.20%
+Checkpoint saved to OMPify/checkpoint_epoch_8.bin
+Epoch 9/20 - Average Loss: 0.5312
+Evaluation accuracy after epoch 9: 59.54%
+Checkpoint saved to OMPify/checkpoint_epoch_9.bin
+Epoch 10/20 - Average Loss: 0.5261
+Evaluation accuracy after epoch 10: 59.76%
+Checkpoint saved to OMPify/checkpoint_epoch_10.bin
+Epoch 11/20 - Average Loss: 0.5242
+Evaluation accuracy after epoch 11: 59.71%
+Checkpoint saved to OMPify/checkpoint_epoch_11.bin
+Epoch 12/20 - Average Loss: 0.5216
+Evaluation accuracy after epoch 12: 59.93%
+Checkpoint saved to OMPify/checkpoint_epoch_12.bin
+Epoch 13/20 - Average Loss: 0.5225
+Evaluation accuracy after epoch 13: 59.93%
+Checkpoint saved to OMPify/checkpoint_epoch_13.bin
+Epoch 14/20 - Average Loss: 0.5193
+Evaluation accuracy after epoch 14: 60.04%
+Checkpoint saved to OMPify/checkpoint_epoch_14.bin
+Epoch 15/20 - Average Loss: 0.5184
+Evaluation accuracy after epoch 15: 60.49%
+Checkpoint saved to OMPify/checkpoint_epoch_15.bin
+Epoch 16/20 - Average Loss: 0.5167
+Evaluation accuracy after epoch 16: 60.55%
+Checkpoint saved to OMPify/checkpoint_epoch_16.bin
+Epoch 17/20 - Average Loss: 0.5159
+Evaluation accuracy after epoch 17: 60.55%
+Checkpoint saved to OMPify/checkpoint_epoch_17.bin
+Epoch 18/20 - Average Loss: 0.5146
+Evaluation accuracy after epoch 18: 60.61%
+Checkpoint saved to OMPify/checkpoint_epoch_18.bin
+Epoch 19/20 - Average Loss: 0.5125
+Evaluation accuracy after epoch 19: 60.77%
+Checkpoint saved to OMPify/checkpoint_epoch_19.bin
+Epoch 20/20 - Average Loss: 0.5130
+Evaluation accuracy after epoch 20: 60.66%
+Checkpoint saved to OMPify/checkpoint_epoch_20.bin
+Retrained model saved to OMPify/new_model.bin
+Grouped Split: 2896 training samples, 717 validation samples.
+Epoch 1/20 - Average Loss: 0.4281
+Evaluation accuracy after epoch 1: 37.01%
+Checkpoint saved to OMPify/checkpoint_epoch_1.bin
