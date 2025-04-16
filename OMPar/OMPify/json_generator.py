@@ -1,0 +1,60 @@
+import os
+import json
+
+template_json = "database_template.json"
+database_root = "database"
+output_json = "database.json"
+
+with open(template_json, "r") as f:
+    template_data = json.load(f)
+
+database_dict = {}
+
+for folder_name, meta in template_data.items():
+    folder_path = os.path.join(database_root, folder_name)
+    if not os.path.isdir(folder_path):
+        print(f"Skipping: Folder not found -> {folder_path}")
+        continue
+
+    # Check required analysis files exist
+    static_path = os.path.join(folder_path, "static.txt")
+    dynamic_path = os.path.join(folder_path, "dynamic.txt")
+    memory_access_count_path = os.path.join(folder_path, "memory_access_count.txt")
+    if not (os.path.exists(static_path) and os.path.exists(dynamic_path) and os.path.exists(memory_access_count_path)):
+        print(f"Skipping: Missing analysis file(s) in {folder_name}")
+        continue
+
+    # Extract original .c filename from template (before colon)
+    original_str = meta["original"]
+    if ":" not in original_str:
+        print(f"Skipping: Invalid original format -> {original_str}")
+        continue
+    original_c_path, line_info = original_str.split(":", 1)
+    original_c_filename = os.path.basename(original_c_path)
+
+    # Check if the original .c file actually exists in this folder
+    expected_c_path = os.path.join(folder_path, original_c_filename)
+    if not os.path.isfile(expected_c_path):
+        print(f"Skipping: original .c file '{original_c_filename}' not found in {folder_name}")
+        continue
+
+    # Assemble new JSON entry
+    item = {
+        "code": os.path.abspath(os.path.join(folder_path, "code.c")),
+        "pragma": os.path.abspath(os.path.join(folder_path, "pragma.c")) if os.path.exists(os.path.join(folder_path, "pragma.c")) else "",
+        "code_pickle": os.path.abspath(os.path.join(folder_path, "code_pickle.pkl")),
+        "nopragma": os.path.abspath(os.path.join(folder_path, "nopragma.c")) if os.path.exists(os.path.join(folder_path, "nopragma.c")) else "",
+        "static_analysis": os.path.abspath(static_path),
+        "dynamic_analysis": os.path.abspath(dynamic_path),
+        "memory_access_count": os.path.abspath(memory_access_count_path),
+        "original": f"{os.path.abspath(expected_c_path)}:{line_info}",
+        "id": len(database_dict)
+    }
+
+    database_dict[folder_name] = item
+
+# Write output
+with open(output_json, "w") as f:
+    json.dump(database_dict, f, indent=4)
+
+print(f"\nDone. Valid entries written to {output_json}")
