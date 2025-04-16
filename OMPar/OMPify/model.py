@@ -163,7 +163,7 @@ class Model(nn.Module):
 
 
 class OMPify:
-    def __init__(self, model_path, device='cpu'):
+    def __init__(self, model_path, device='cpu', load_weights=True):
         base_model = 'microsoft/graphcodebert-base'
         self.code_length = 512
         self.data_flow_length = 128
@@ -178,12 +178,30 @@ class OMPify:
         # Suppose we decided dynamic_size=10, memory_size=5
         self.model = Model(model, self.config, self.tokenizer, dynamic_size=5, memory_size=2)
 
-        full_path = os.path.join(model_path, 'model.bin')
-        if device == 'cpu':
-            self.model.load_state_dict(torch.load(full_path, map_location=torch.device('cpu')))
-        else:
-            self.model.load_state_dict(torch.load(full_path), strict=False)
+        ###################### 
+        # full_path = os.path.join(model_path, 'model.bin')
+        # if device == 'cpu':
+        #     self.model.load_state_dict(torch.load(full_path, map_location=torch.device('cpu')))
+        # else:
+        #     self.model.load_state_dict(torch.load(full_path), strict=False)
+        # # self.model.load_state_dict(torch.load(os.path.join(model_path, 'model.bin')))
 
+        if load_weights:
+            full_path = os.path.join(model_path, 'model.bin')
+            if os.path.exists(full_path):
+                print(f"[INFO] Loading pretrained weights from {full_path}")
+                state_dict = torch.load(full_path, map_location=device)
+
+                # Filter out classifier weights (your current head structure has changed)
+                filtered_state_dict = {
+                    k: v for k, v in state_dict.items()
+                    if not k.startswith("classifier")
+                }
+
+                self.model.load_state_dict(filtered_state_dict, strict=False)
+            else:
+                print(f"[WARN] model.bin not found at {full_path}, using base pretrained encoder.")
+        #####################
 
         self.model.eval()
         self.model.to(device)
@@ -264,51 +282,6 @@ class OMPify:
         
         # build InputFeatures, including dfg_to_code, dfg_to_dfg
         return InputFeatures(source_tokens,source_ids,position_idx,dfg_to_code,dfg_to_dfg, 0, 0, 0)
-
-    # def convert_code(self, code):
-    #     parser=parsers['c']
-
-    #     # extract data flow
-    #     code_tokens,dfg=self.extract_dataflow(code,parser,'c')
-    #     code_tokens=[self.tokenizer.tokenize('@ '+x)[1:] if idx!=0 else self.tokenizer.tokenize(x) for idx,x in enumerate(code_tokens)]
-    #     ori2cur_pos={}
-    #     ori2cur_pos[-1]=(0,0)
-    #     for i in range(len(code_tokens)):
-    #         ori2cur_pos[i]=(ori2cur_pos[i-1][1],ori2cur_pos[i-1][1]+len(code_tokens[i]))    
-    #     code_tokens=[y for x in code_tokens for y in x]  
-        
-    #     # runcating and add pad
-    #     code_tokens=code_tokens[:self.code_length+self.data_flow_length-3-min(len(dfg),self.data_flow_length)][:512-3]
-    #     source_tokens =[self.tokenizer.cls_token]+code_tokens+[self.tokenizer.sep_token]
-    #     source_ids =  self.tokenizer.convert_tokens_to_ids(source_tokens)
-    #     position_idx = [i+self.tokenizer.pad_token_id + 1 for i in range(len(source_tokens))]
-    #     dfg=dfg[:self.code_length+self.data_flow_length-len(source_tokens)]
-    #     source_tokens+=[x[0] for x in dfg]
-    #     position_idx+=[0 for x in dfg]
-    #     source_ids+=[self.tokenizer.unk_token_id for x in dfg]
-    #     padding_length=self.code_length+self.data_flow_length-len(source_ids)
-    #     position_idx+=[self.tokenizer.pad_token_id]*padding_length
-    #     source_ids+=[self.tokenizer.pad_token_id]*padding_length      
-        
-    #     # reindex
-    #     reverse_index={}
-    #     for idx,x in enumerate(dfg):
-    #         reverse_index[x[1]]=idx
-    #     for idx,x in enumerate(dfg):
-    #         dfg[idx]=x[:-1]+([reverse_index[i] for i in x[-1] if i in reverse_index],)    
-    #     dfg_to_dfg=[x[-1] for x in dfg]
-    #     dfg_to_code=[ori2cur_pos[x[1]] for x in dfg]
-    #     length=len([self.tokenizer.cls_token])
-    #     dfg_to_code=[(x[0]+length,x[1]+length) for x in dfg_to_code]
-        
-    #     # build InputFeatures, including dfg_to_code, dfg_to_dfg
-    #     return (torch.tensor(model_input.input_ids_1),
-    #     torch.tensor(model_input.position_idx_1),
-    #     torch.tensor(attn_mask_1),                 
-    #     torch.tensor(model_input.pragma_label),
-    #     torch.tensor(model_input.private_label),
-    #     torch.tensor(model_input.reduction_label))
-
 
     def convert_code(self, code):
         model_input = self.convert_examples_to_features(code)
