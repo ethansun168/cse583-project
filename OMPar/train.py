@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader, Subset
 from OMPify.model import OMPify  # Load your model from OMPify/model.py
 from OMPify.dataset import OMPifyDataset, group_split_dataset
-from sklearn.metrics import f1_score, precision_score, recall_score
+from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_score
 import os
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -37,14 +37,14 @@ scheduler = torch.optim.lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_f
 
 best_f1 = 0
 num_epochs = 20
-start_epoch = 17
+# start_epoch = 17
 
-# 載入先前模型
-checkpoint_path = os.path.join("OMPify", "best_model.bin")
-ompfy.model.load_state_dict(torch.load(checkpoint_path))
 
-# for epoch in range(num_epochs):
-for epoch in range(start_epoch, num_epochs):
+# checkpoint_path = os.path.join("OMPify", "best_model.bin")
+# ompfy.model.load_state_dict(torch.load(checkpoint_path))
+
+for epoch in range(num_epochs):
+# for epoch in range(start_epoch, num_epochs):
     total_loss = 0.0
     ompfy.model.train()
     for features, targets in train_loader:
@@ -93,6 +93,7 @@ for epoch in range(start_epoch, num_epochs):
             mem_feats = features["memory_features"].to(device)
             targets = targets.to(device)
             probs = ompfy.model(input_ids, position_idx, attn_mask, dynamic_feats=dyn_feats, memory_feats=mem_feats)
+            # probs = ompfy.model(input_ids, position_idx, attn_mask, dynamic_feats=dyn_feats)
             y_true.append(targets.cpu())
             y_pred.append((probs > 0.5).float().cpu())
 
@@ -101,9 +102,11 @@ for epoch in range(start_epoch, num_epochs):
     f1 = f1_score(y_true, y_pred, average='micro')
     prec = precision_score(y_true, y_pred, average='micro')
     rec = recall_score(y_true, y_pred, average='micro')
+    accuracy = accuracy_score(y_true, y_pred)
 
-    print(f"Eval F1: {f1:.4f} | Precision: {prec:.4f} | Recall: {rec:.4f}")
-    log_file.write(f"Eval F1: {f1:.4f} | Precision: {prec:.4f} | Recall: {rec:.4f}\n")
+    print(f"Eval F1: {f1:.4f} | Precision: {prec:.4f} | Recall: {rec:.4f} | Accuracy: {accuracy:.4f}")
+    log_file.write(f"Eval F1: {f1:.4f} | Precision: {prec:.4f} | Recall: {rec:.4f} | Accuracy: {accuracy:.4f}\n")
+
 
     # Save best checkpoint
     if f1 > best_f1:

@@ -143,7 +143,7 @@ class Model(nn.Module):
         cls_emb = outputs[:, 0, :]  # [batch_size, hidden_size]
 
         if dynamic_feats is None:
-            dynamic_feats = torch.zeros(bs, 5, device=cls_emb.device)  # e.g., default shape
+            dynamic_feats = torch.zeros(bs, 3, device=cls_emb.device)  # e.g., default shape
         if memory_feats is None:
             memory_feats = torch.zeros(bs, 2, device=cls_emb.device)
 
