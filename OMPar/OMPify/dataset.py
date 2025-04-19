@@ -3,32 +3,30 @@ import os
 import torch
 from .model import OMPify
 from torch.utils.data import Dataset, random_split
+import numpy as np
 
 import numpy as np
 
 def parse_dynamic(dynamic_text):
     """
-    Parse dynamic.txt and return a 5-length feature vector:
+    Parse dynamic.txt and return a 3-length feature vector:
       0) avg_branch_freq: average frequency of branch entries.
-      1) std_branch_freq: standard deviation of branch frequencies. (delete)
-      2) avg_instr: average instruction count per basic block.
-      3) avg_load: average load count per basic block.
-      4) avg_store: average store count per basic block.
-      total 
+      1) avg_instr: average instruction count per basic block.
+      2) avg_data_access: average data-access count per basic block (avg_load + avg_store).
     """
     branch_freqs = []
     bb_instr_counts = []
     bb_load_counts = []
     bb_store_counts = []
-    
+
     lines = dynamic_text.splitlines()
     current_block_instr = None
     current_block_load = None
     current_block_store = None
-    
+
     in_branch_section = False
     in_data_access_section = False
-    
+
     for line in lines:
         line = line.strip()
         if line.startswith("--- Branch Counts ---"):
@@ -43,18 +41,19 @@ def parse_dynamic(dynamic_text):
             in_branch_section = False
             in_data_access_section = False
             continue
-        
-        # 取 Branch Counts 中的頻率
+
+        # Branch frequencies
         if in_branch_section and "Frequency =" in line:
             try:
                 freq = float(line.split("Frequency =")[1].split()[0])
                 branch_freqs.append(freq)
             except Exception:
                 pass
-        
-        # 取 Data Access Count 中的基本區塊資訊
+
+        # Basic-block data-access info
         if in_data_access_section:
             if line.startswith("BasicBlock"):
+                # finish previous block
                 if current_block_instr is not None:
                     bb_instr_counts.append(current_block_instr)
                     bb_load_counts.append(current_block_load)
@@ -64,46 +63,40 @@ def parse_dynamic(dynamic_text):
                 current_block_store = None
             elif line.startswith("Instr count:"):
                 try:
-                    parts = line.split("=")[-1].split()
-                    current_block_instr = float(parts[0])
+                    current_block_instr = float(line.split("=", 1)[1].split()[0])
                 except Exception:
                     current_block_instr = 0.0
             elif line.startswith("Load count:"):
                 try:
-                    parts = line.split("=")[-1].split()
-                    current_block_load = float(parts[0])
+                    current_block_load = float(line.split("=", 1)[1].split()[0])
                 except Exception:
                     current_block_load = 0.0
             elif line.startswith("Store count:"):
                 try:
-                    parts = line.split("=")[-1].split()
-                    current_block_store = float(parts[0])
+                    current_block_store = float(line.split("=", 1)[1].split()[0])
                 except Exception:
                     current_block_store = 0.0
-                    
+
+    # append last block if any
     if in_data_access_section and current_block_instr is not None:
         bb_instr_counts.append(current_block_instr)
         bb_load_counts.append(current_block_load)
         bb_store_counts.append(current_block_store)
-    
-    if branch_freqs:
-        avg_branch_freq = float(np.mean(branch_freqs))
-        std_branch_freq = float(np.std(branch_freqs))
-    else:
-        avg_branch_freq = 0.0
-        std_branch_freq = 0.0
-    
+
+    # compute averages
+    avg_branch_freq = float(np.mean(branch_freqs)) if branch_freqs else 0.0
     num_blocks = len(bb_instr_counts)
     if num_blocks > 0:
         avg_instr = float(np.mean(bb_instr_counts))
         avg_load = float(np.mean(bb_load_counts))
         avg_store = float(np.mean(bb_store_counts))
+        avg_data_access = avg_load + avg_store
     else:
         avg_instr = 0.0
-        avg_load = 0.0
-        avg_store = 0.0
-    
-    return [avg_branch_freq, std_branch_freq, avg_instr, avg_load, avg_store]
+        avg_data_access = 0.0
+
+    return [avg_branch_freq, avg_instr, avg_data_access]
+
 
 
 def parse_memory(memory_text):
@@ -235,3 +228,4 @@ def group_split_dataset(dataset, train_ratio=0.8):
         val_indices.extend(groups[key])
     
     return train_indices, val_indices
+
