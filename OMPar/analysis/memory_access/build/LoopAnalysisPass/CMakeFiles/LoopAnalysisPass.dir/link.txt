@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -Wl,--gc-sections -shared  -o LoopAnalysisPass.so CMakeFiles/LoopAnalysisPass.dir/Pass.cpp.o CMakeFiles/LoopAnalysisPass.dir/mem_logger.cpp.o  -Wl,-rpath,"\$ORIGIN/../lib:" 
