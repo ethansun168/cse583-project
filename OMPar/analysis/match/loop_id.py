@@ -7,7 +7,7 @@ def similarity(a, b):
 
 def simplify_for_condition(line):
     """
-    將 for(...) 中的第二欄條件（如 j < SIZE）替換成 _
+    Replace the second condition in for(...) (e.g., j < SIZE) with _
     e.g. for(j=0; j<SIZE; j++) → for(j=0; _; j++)
     """
     match = re.match(r'(.*for\s*\(.*?;)(.*?)(;.*?\))', line)
@@ -17,18 +17,18 @@ def simplify_for_condition(line):
 
 
 def normalize(code):
-    """簡化程式碼：移除空白、tab、換行與多餘括號空格"""
+    """Simplify code: remove spaces, tabs, newlines, and unnecessary braces"""
     lines = code.split('\n')
-    lines = [simplify_for_condition(line) for line in lines]  # ✅ 把 for 的中間條件換成 "_"
+    lines = [simplify_for_condition(line) for line in lines]  # Replace the middle condition of for loop with "_"
     code = '\n'.join(lines)
-    code = re.sub(r'[\s{}]+', '', code)           # 移除空白、縮排、大括號
+    code = re.sub(r'[\s{}]+', '', code)           # Remove whitespace, indentation, and curly braces
     code = re.sub(r'\(\s*', '(', code)
     code = re.sub(r'\s*\)', ')', code)
-    code = re.sub(r'[()]', '', code)              # 💡 新增：移除所有括號
+    code = re.sub(r'[()]', '', code)              # New: remove all parentheses
     return code
 
 def extract_loops(loop_file_path, n_lines):
-    """提取 loop_analysis_output.txt 中每個 loop 的前 n_lines 行 snippet"""
+    """Extract the first n_lines of each loop snippet from loop_analysis_output.txt"""
     loops = {}
     current_id = None
     snippet_lines = []
@@ -47,7 +47,7 @@ def extract_loops(loop_file_path, n_lines):
     return loops
 
 def extract_first_loop(code_file_path):
-    """從 code.c 中抓取第一個 for loop 的前 N 行（N = min(3, available lines))"""
+    """Extract the first for loop (up to 3 lines) from code.c"""
     with open(code_file_path, 'r') as f:
         lines = f.readlines()
 
@@ -59,7 +59,7 @@ def extract_first_loop(code_file_path):
             collecting = True
         if collecting:
             snippet.append(line)
-            if len(snippet) == 3:  # 最多三行
+            if len(snippet) == 3:  # Up to three lines
                 break
 
     return normalize(''.join(snippet)), len(snippet)
@@ -89,7 +89,7 @@ def process_directory(dir_path, threshold=0.85):
                     if candidate == code_snippet:
                         with open(output_path, 'w') as out:
                             out.write(f"LoopID = {current_id}\n")
-                        print(f"\n✅ Exact match: LoopID {current_id}")
+                        print(f"\nExact match: LoopID {current_id}")
                         return "pass"
 
                     score = similarity(candidate, code_snippet)
@@ -104,13 +104,13 @@ def process_directory(dir_path, threshold=0.85):
             else:
                 snippet_lines.append(line)
 
-        # 處理最後一段 loop
+        # Process the last loop section
         if current_id is not None:
             candidate = normalize('\n'.join(snippet_lines[:code_line_count]))
             if candidate == code_snippet:
                 with open(output_path, 'w') as out:
                     out.write(f"LoopID = {current_id}\n")
-                print(f"\n✅ Exact match: LoopID {current_id}")
+                print(f"\nExact match: LoopID {current_id}")
                 return "pass"
 
             score = similarity(candidate, code_snippet)
@@ -119,15 +119,15 @@ def process_directory(dir_path, threshold=0.85):
                 best_id = current_id
                 best_candidate = candidate
 
-    # 即使低於 threshold，也強制選出最佳 match
+    # Select the best match even if it's below the threshold
     with open(output_path, 'w') as f:
         match_type = "fuzzy match" if best_score >= threshold else "low confidence"
         f.write(f"LoopID = {best_id}  # {match_type} (score={best_score:.2f})\n")
 
     if best_score >= threshold:
-        print(f"\n🟡 Fuzzy match: LoopID {best_id} (score={best_score:.2f})")
+        print(f"\nFuzzy match: LoopID {best_id} (score={best_score:.2f})")
     else:
-        print(f"\n🔴 Low-confidence match: LoopID {best_id} (score={best_score:.2f})")
+        print(f"\nLow-confidence match: LoopID {best_id} (score={best_score:.2f})")
 
     print("----- Normalized code.c -----")
     print(code_snippet)
