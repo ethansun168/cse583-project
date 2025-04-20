@@ -58,7 +58,7 @@ for SRC_FILE in ../database_test/*/nopragma.c; do
     # Step 5: Run instrumented binary with timeout
     timeout 40s ./"${BENCH_NAME}_prof" > /dev/null 2>&1
     if [ $? -eq 124 ]; then
-        echo "⚠️ Timeout during ${BENCH_NAME}_prof execution"
+        echo "Timeout during ${BENCH_NAME}_prof execution"
         echo "[prof timeout] $SRC_FILE" >> "$TIMEOUT_LOG"
     fi
 
