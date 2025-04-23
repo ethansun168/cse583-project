@@ -105,11 +105,14 @@ class RobertaClassificationHead(nn.Module):
         return x
         
 class Model(nn.Module):
-    def __init__(self, encoder, config, tokenizer, dynamic_size=5, memory_size=2):
+    # def __init__(self, encoder, config, tokenizer, dynamic_size=3, memory_size=100):
+    def __init__(self, encoder, config, tokenizer, dynamic_size=6, memory_size=2):
         super(Model, self).__init__()
         self.encoder = encoder
         self.config = config
         self.tokenizer = tokenizer
+        self.memory_size = memory_size
+
         hidden_size = config.hidden_size  # e.g., 768
         num_labels = config.num_labels    # 3 in your case
         self.classifier = ExtendedClassificationHead(hidden_size, dynamic_size, memory_size, num_labels)
@@ -142,10 +145,15 @@ class Model(nn.Module):
         # Take the [CLS] embedding from outputs
         cls_emb = outputs[:, 0, :]  # [batch_size, hidden_size]
 
+        # if dynamic_feats is None:
+        #     dynamic_feats = torch.zeros(bs, 3, device=cls_emb.device)  # e.g., default shape
+        # if memory_feats is None:
+        #     memory_feats = torch.zeros(bs, 2, device=cls_emb.device)
+
         if dynamic_feats is None:
-            dynamic_feats = torch.zeros(bs, 3, device=cls_emb.device)  # e.g., default shape
+            dynamic_feats = torch.zeros(bs, self.classifier.dynamic_size, device=cls_emb.device)  # e.g., default shape
         if memory_feats is None:
-            memory_feats = torch.zeros(bs, 2, device=cls_emb.device)
+            memory_feats = torch.zeros(bs, self.classifier.memory_size, device=cls_emb.device)
 
         # Use the extended classification head
         logits = self.classifier(cls_emb, dynamic_feats, memory_feats)
@@ -176,7 +184,8 @@ class OMPify:
 
         model = RobertaForSequenceClassification.from_pretrained(base_model, config=self.config)
         # Suppose we decided dynamic_size=10, memory_size=5
-        self.model = Model(model, self.config, self.tokenizer, dynamic_size=5, memory_size=2)
+        # self.model = Model(model, self.config, self.tokenizer, dynamic_size=3, memory_size=100)
+        self.model = Model(model, self.config, self.tokenizer, dynamic_size=6, memory_size=2)
 
         ###################### 
         # full_path = os.path.join(model_path, 'model.bin')
@@ -186,11 +195,23 @@ class OMPify:
         #     self.model.load_state_dict(torch.load(full_path), strict=False)
         # # self.model.load_state_dict(torch.load(os.path.join(model_path, 'model.bin')))
 
+        # if load_weights:
+        #     full_path = os.path.join(model_path, 'noid_dynamic_mem_best_model.bin')
+        #     # full_path = os.path.join(model_path, 'best_model_mem_dyn_id.bin')
+        #     if os.path.exists(full_path):
+        #         print(f"[INFO] Loading pretrained weights from {full_path}")
+                
+        #         state_dict = torch.load(full_path, map_location=device)
+        #         self.model.load_state_dict(state_dict, strict=True)
+        #     else:
+        #         print(f"[WARN] Weight file not found at {full_path}, skipping load.")
+
+
         if load_weights:
             full_path = os.path.join(model_path, 'model.bin')
             if os.path.exists(full_path):
                 print(f"[INFO] Loading pretrained weights from {full_path}")
-                state_dict = torch.load(full_path, map_location=device)
+                state_dict = torch.load(full_path, map_location=device, weights_only=True)
 
                 # Filter out classifier weights (your current head structure has changed)
                 filtered_state_dict = {
