@@ -9,7 +9,7 @@ To build this tool, ensure that your system supports CUDA 12.1 before proceeding
 #### 1. Clone the repository:
 
 ```bash
-git clone https://github.com/ethansun168/cse583-project.git
+git clone -b model https://github.com/ethansun168/cse583-project.git
 cd OMPar
 ```
 
@@ -57,7 +57,7 @@ Download the custom OMPify model weights from [here](https://drive.google.com/dr
 Run the model with:
 
 ```bash
-python3 run_ompar.py --source_file demo/test/test.c --dynamic_file demo/test/dynamic.txt --memory_file demo/test/memory_access_count.txt
+python3 run_ompar.py --source_file demo/test1/mytest.c --static_file demo/test1/static.txt --dynamic_file demo/test1/dynamic.txt --memory_file demo/test1/memory_access_count.txt
 ```
 
 ## Training the Model
@@ -89,7 +89,7 @@ to get these files, you need to put the original code and run the LLVM analysis 
 
 Steps:
 
-- Run run_all.sh and loop_id.py in analysis/match/.
+- To get these files, you need to put the original code and code.c. Run run_all.sh and loop_id.py in analysis/match/.
 - After obtaining ID.txt, modify analysis/memory_access/unique.py:
 
   - Comment out version 1
@@ -104,9 +104,7 @@ If you try to use our dataset, just run json_generator.py:
 - Use verion 1 for dataset without loop ID
 - Use version 2 for datasets with loop ID
 
-#### 3. Slightly modify train.py
-
-#### 4. Train the model
+#### 3. Train the model
 
 Start training by running:
 

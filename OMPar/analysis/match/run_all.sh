@@ -5,10 +5,11 @@ PATH2LIB="$(pwd)/build/LoopAnalysisPass/LoopAnalysisPass.so"
 PASS=loop-analysis
 
 # Loop over all database/*/nopragma.c files
-for SRC_FILE in ../database_test/*/nopragma.c; do
+for SRC_FILE in ../../demo/*/test.c; do
     [ -e "$SRC_FILE" ] || continue
 
     DIR_PATH=$(realpath "$(dirname "$SRC_FILE")")
+    FILENAME=$(basename "$SRC_FILE")
     BENCH_NAME=$(basename "$DIR_PATH")  # folder name, used as base name
 
     echo "=== Processing $SRC_FILE ==="
@@ -22,7 +23,7 @@ for SRC_FILE in ../database_test/*/nopragma.c; do
     rm -f default.profraw *_prof *_fplicm *.bc *.profdata *_output *.ll loop_analysis_output.txt mem_access_log.txt
 
     # Step 1: Generate LLVM bitcode
-    clang -emit-llvm -c "nopragma.c" -g -Xclang -disable-O0-optnone -o "${BENCH_NAME}.bc" -Wno-deprecated-non-prototype
+    clang -emit-llvm -c "$FILENAME" -g -Xclang -disable-O0-optnone -o "${BENCH_NAME}.bc" -Wno-deprecated-non-prototype
 
     # Step 2: Add PGO instrumentation
     opt -passes='pgo-instr-gen,instrprof' "${BENCH_NAME}.bc" -o "${BENCH_NAME}.prof.bc"

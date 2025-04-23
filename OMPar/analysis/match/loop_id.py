@@ -138,7 +138,7 @@ def process_directory(dir_path, threshold=0.85):
 
 
 def main():
-    base_dir = "../database_test"
+    base_dir = "../../demo"
     passed = 0
     failed = 0
     skipped = 0
