@@ -4,7 +4,38 @@ import argparse
 import numpy as np
 from OMPify.model import OMPify
 from transformers import GPTNeoXForCausalLM, GPT2Tokenizer
+import re
 
+
+def parse_static(static_text: str):
+    """
+    return [ total_instr_cnt, total_load+store_cnt, total_branch_cnt ]
+    """
+    instr_total  = 0
+    load_total   = 0
+    store_total  = 0
+    branch_total = 0
+
+    # Branches
+    regex = re.compile(
+        r"NumInstructions:\s*(\d+).*?"
+        r"-\s*Loads:\s*(\d+).*?"
+        r"-\s*Stores:\s*(\d+).*?"
+        r"-\s*Branches:\s*(\d+)",
+        re.S
+    )
+
+    for m in regex.finditer(static_text):
+        instr_total  += int(m.group(1))
+        load_total   += int(m.group(2))
+        store_total  += int(m.group(3))
+        branch_total += int(m.group(4))
+
+    return [
+        float(instr_total),
+        float(load_total + store_total),
+        float(branch_total)
+    ]
 
 def parse_dynamic(dynamic_text):
     """
@@ -95,11 +126,7 @@ def parse_dynamic(dynamic_text):
 
 
 def parse_memory(memory_text):
-    """
-    Return a 2-length vector:
-      0) mean_access: average memory access count.
-      1) max_access: maximum memory access count.
-    """
+    
     if not memory_text:
         return [0.0, 0.0]
     lines = memory_text.splitlines()
@@ -118,6 +145,11 @@ def parse_memory(memory_text):
     max_access = float(max(access_counts))
     return [mean_access, max_access]
 
+
+def load_static_feats(path):
+    with open(path, 'r', encoding='utf-8') as f:
+        text = f.read()
+    return parse_static(text)
 
 def load_dynamic_feats(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -165,8 +197,7 @@ class OMPAR:
             mem = None
 
         # Get probability from classifier
-        prob = self.model_cls.model(inputs_ids, position_idx, attn_mask,
-                                    dynamic_feats=dyn, memory_feats=mem)
+        prob = self.model_cls.model(inputs_ids, position_idx, attn_mask, dynamic_feats=dyn, memory_feats=mem)
         pred = prob > 0.5
         pragma_pred = pred.squeeze()[0].cpu().item()
         return bool(pragma_pred)

@@ -1,3 +1,4 @@
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -65,6 +66,8 @@ class ExtendedClassificationHead(nn.Module):
     def __init__(self, hidden_size, dynamic_size, memory_size, num_labels):
         super().__init__()
         # We'll combine them by concatenation -> total size = hidden_size + dynamic_size + memory_size
+        self.dynamic_size = dynamic_size
+        self.memory_size = memory_size
         combined_size = hidden_size + dynamic_size + memory_size
         self.fc1 = nn.Linear(combined_size, hidden_size)
         self.dropout = nn.Dropout(0.1)
@@ -208,7 +211,7 @@ class OMPify:
 
 
         if load_weights:
-            full_path = os.path.join(model_path, 'model.bin')
+            full_path = os.path.join(model_path, 'best_model_all.bin')
             if os.path.exists(full_path):
                 print(f"[INFO] Loading pretrained weights from {full_path}")
                 state_dict = torch.load(full_path, map_location=device, weights_only=True)

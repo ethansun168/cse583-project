@@ -1,40 +1,37 @@
+
 import os
 import json
 import re
 
-# Paths to input and output files
 template_json = "database_template.json"
 database_root = "database"
 output_json = "database.json"
 
-# Regular expressions to detect OpenMP clauses
 reduction_reg = re.compile(r'reduction\s*\(')
 private_reg = re.compile(r'private\s*\(')
 
-# Load the template metadata
 with open(template_json, "r") as f:
     template_data = json.load(f)
 
 database_dict = {}
 
-# Iterate over each folder listed in the template
 for folder_name, meta in template_data.items():
     folder_path = os.path.join(database_root, folder_name)
     if not os.path.isdir(folder_path):
         print(f"Skipping: Folder not found -> {folder_path}")
         continue
 
-    # Paths to required analysis files (dynamic is now extracted_dynamic.txt)
+    static_path = os.path.join(folder_path, "static.txt")
+    # Version 1
     extracted_dynamic_path = os.path.join(folder_path, "dynamic.txt")
+    # Version 2
     # extracted_dynamic_path = os.path.join(folder_path, "extracted_dynamic.txt")
     memory_access_count_path = os.path.join(folder_path, "memory_access_count.txt")
 
-    # Check if required files exist
     if not (os.path.exists(extracted_dynamic_path) and os.path.exists(memory_access_count_path)):
         print(f"Skipping: Missing analysis file(s) in {folder_name}")
         continue
 
-    # Extract original .c filename and check if it exists
     original_str = meta["original"]
     if ":" not in original_str:
         print(f"Skipping: Invalid original format -> {original_str}")
@@ -47,7 +44,6 @@ for folder_name, meta in template_data.items():
         print(f"Skipping: original .c file '{original_c_filename}' not found in {folder_name}")
         continue
 
-    # Check if pragma.c exists and look for private/reduction clauses
     pragma_path = os.path.join(folder_path, "pragma.c")
     exist = os.path.exists(pragma_path)
     is_reduction = False
@@ -59,10 +55,10 @@ for folder_name, meta in template_data.items():
             is_reduction = bool(reduction_reg.search(pragma_content))
             is_private = bool(private_reg.search(pragma_content))
 
-    # Assemble the new JSON entry with selected fields, including extracted_dynamic
     item = {
         "code": os.path.abspath(os.path.join(folder_path, "code.c")),
         "pragma": os.path.abspath(pragma_path) if exist else "",
+        "static_analysis": os.path.abspath(static_path),
         "dynamic_analysis": os.path.abspath(extracted_dynamic_path),
         "memory_access_count": os.path.abspath(memory_access_count_path),
         "original": f"{os.path.abspath(expected_c_path)}:{line_info}",
@@ -72,10 +68,8 @@ for folder_name, meta in template_data.items():
         "reduction": int(is_reduction)
     }
 
-    # Save the entry to the final dictionary
     database_dict[folder_name] = item
 
-# Write the final output JSON
 with open(output_json, "w") as f:
     json.dump(database_dict, f, indent=4)
 

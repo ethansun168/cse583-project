@@ -99,12 +99,14 @@ Steps:
 
 #### 2. Generate .json files
 
-run json_generator.py:
+If you try to use our dataset, just run json_generator.py:
 
 - Use verion 1 for dataset without loop ID
 - Use version 2 for datasets with loop ID
 
-#### 3. Train the model
+#### 3. Slightly modify train.py
+
+#### 4. Train the model
 
 Start training by running:
 
