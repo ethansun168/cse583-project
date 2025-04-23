@@ -1,4 +1,4 @@
-# CSE583 Final Project – Auto Parallelization
+# CSE583 Final Project – Auto Parallelization haha
 
 This is the final project for CSE583. We extend [OMPAR](https://github.com/Scientific-Computing-Lab/OMPar.git), a compiler-based tool for identifying and generating parallelization opportunities in serial code, by incorporating dynamic analysis and memory access profiling.
 
@@ -59,8 +59,6 @@ Run the model with:
 ```bash
 python3 run_ompar.py --source_file demo/test/test.c --dynamic_file demo/test/dynamic.txt --memory_file demo/test/memory_access_count.txt
 ```
-
-
 
 ## Training the Model
 
