@@ -52,7 +52,7 @@ Check that the following files are generated in your demo/<your_folder>/:
 
 #### 3. Run the Prediction Model
 
-YDownload the custom OMPify model weights from [here](https://drive.google.com/drive/folders/1tnJf9YvjpDLktVi23TkW-rpjqfdZoybf?usp=sharing), and place the .bin file inside the OMPify/ directory.
+Download the custom OMPify model weights from [here](https://drive.google.com/drive/folders/1tnJf9YvjpDLktVi23TkW-rpjqfdZoybf?usp=sharing), and place the .bin file inside the OMPify/ directory.
 
 Run the model with:
 
@@ -62,11 +62,11 @@ python3 run_ompar.py --source_file demo/test/test.c --dynamic_file demo/test/dyn
 
 
 
-## Training th Model
+## Training the Model
 
 #### 1. Prepare the dataset
 
-* Your dataset should include the following files:
+You can download the re-organized version (with loop ID) of the Open-OMP-Plus dataset used in our experiments from [here](https://drive.google.com/drive/folders/1p0-KupXmykfh_3bNbQnrHAUmsKGfD54T?usp=drive_link). Alternatively, you can prepare your own dataset following the same format. Each sample directory should contain the following files:
 
 ###### (1) W/O loop ID
 
