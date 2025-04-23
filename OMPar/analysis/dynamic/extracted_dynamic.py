@@ -2,7 +2,7 @@
 import os
 import re
 
-ROOT_DIR = "../database_test"
+ROOT_DIR = "../../demo"
 
 # find ID.txt
 def read_loop_id(id_path):

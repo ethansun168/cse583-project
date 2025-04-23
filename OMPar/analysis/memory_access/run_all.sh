@@ -15,7 +15,7 @@ echo -n > "$TIMEOUT_LOG"   # clear timeout log
 clang++ -c -o "$MEM_LOGGER" LoopAnalysisPass/mem_logger.cpp -pthread
 
 # Loop over all database/*/*_nopragma.c files
-for SRC_FILE in ../database_test/*/nopragma.c; do
+for SRC_FILE in ../../demo/*/test.c; do
     [ -e "$SRC_FILE" ] || continue
 
     DIR_PATH=$(realpath "$(dirname "$SRC_FILE")")
@@ -58,7 +58,7 @@ for SRC_FILE in ../database_test/*/nopragma.c; do
     # Step 5: Run instrumented binary with timeout
     timeout 40s ./"${BENCH_NAME}_prof" > /dev/null 2>&1
     if [ $? -eq 124 ]; then
-        echo "Timeout during ${BENCH_NAME}_prof execution"
+        echo "⚠️ Timeout during ${BENCH_NAME}_prof execution"
         echo "[prof timeout] $SRC_FILE" >> "$TIMEOUT_LOG"
     fi
 
@@ -78,7 +78,7 @@ for SRC_FILE in ../database_test/*/nopragma.c; do
     # Step 10: Run instrumented binary with timeout
     timeout 40s ./"${BENCH_NAME}_instrumented" > /dev/null 2>&1
     if [ $? -eq 124 ]; then
-        echo "Timeout during ${BENCH_NAME}_instrumented execution"
+        echo "⚠️ Timeout during ${BENCH_NAME}_instrumented execution"
         echo "[instrumented timeout] $SRC_FILE" >> "$TIMEOUT_LOG"
     fi
 
@@ -98,6 +98,3 @@ done
 
 echo "=== All Done ==="
 echo "Timeouts logged in $TIMEOUT_LOG"
-
-
-

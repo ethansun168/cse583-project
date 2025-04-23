@@ -6,11 +6,10 @@
 # The temporary .ll file is deleted after processing.
 
 # Path to the LLVM pass plugin.
-PATH2LIB="$(pwd)/build/DynamicPass/DynamicPass.so"
+PATH2LIB="$(pwd)/build/LoopAnalysisPass/LoopAnalysisPass.so"
 
 # Loop over all .c and .cpp files in the input directory.
 for bench in ../../demo/*/test.c; do
-# for bench in ../database/test.c; do
     # Skip if no matching file is found.
     if [ ! -e "$bench" ]; then
         continue
@@ -37,11 +36,11 @@ for bench in ../../demo/*/test.c; do
     fi
 
     # Define the output file (static.txt) in the same folder as the source file.
-    txt_file="${bench_dir}/dynamic.txt"
+    txt_file="${bench_dir}/static.txt"
 
     # Run the LLVM pass on the temporary LLVM IR file.
     # The pass output (or error messages) is redirected to static.txt.
-    opt -disable-output -load-pass-plugin="$PATH2LIB" -passes="dynamic-analysis" "$temp_ll" 2> "$txt_file"
+    opt -disable-output -load-pass-plugin="$PATH2LIB" -passes="loop-analysis" "$temp_ll" 2> "$txt_file"
     if [ $? -ne 0 ]; then
         echo "Error running the pass on $temp_ll"
         rm -f "$temp_ll"
