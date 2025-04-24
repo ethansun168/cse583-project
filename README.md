@@ -9,7 +9,7 @@ To build this tool, ensure that your system supports CUDA 12.1 before proceeding
 #### 1. Clone the repository:
 
 ```bash
-git clone -b model https://github.com/ethansun168/cse583-project.git
+git clone https://github.com/ethansun168/cse583-project.git
 cd OMPar
 ```
 
