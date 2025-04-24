@@ -52,7 +52,7 @@ Check that the following files are generated in your demo/<your_folder>/:
 
 #### 3. Run the Prediction Model
 
-Download the custom OMPify model weights from [here](https://drive.google.com/drive/folders/1tnJf9YvjpDLktVi23TkW-rpjqfdZoybf?usp=sharing), and place the .bin file inside the OMPify/ directory.
+Download the custom OMPify model weights from [here](https://drive.google.com/drive/folders/1p0-KupXmykfh_3bNbQnrHAUmsKGfD54T?usp=drive_link), and place the .bin file inside the OMPify/ directory.
 
 Run the model with:
 
