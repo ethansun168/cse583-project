@@ -113,7 +113,7 @@ if __name__ == "__main__":
 #     ids: Set[str] = set()
 #     id_re = re.compile(r"LoopID\s*=\s*(\d+)")
 #     if not os.path.isfile(id_file):
-#         return ids          # empty ⇒ 代表沒有指定，要保留全部
+#         return ids       
 #     with open(id_file, "r") as f:
 #         for line in f:
 #             m = id_re.search(line)
@@ -222,7 +222,7 @@ if __name__ == "__main__":
 # # ---------- entry ------------------------------------------------------------ #
 # def main() -> None:
 #     here = os.path.dirname(os.path.abspath(__file__))
-#     db_dir = os.path.join(here, "..", "database_test")
+#     db_dir = os.path.join(here, "..", "..", "demo")
 #     if not os.path.isdir(db_dir):
 #         print(f"[error] database dir not found: {db_dir}")
 #         return

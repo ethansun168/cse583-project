@@ -75,7 +75,8 @@ You can download the re-organized version (with loop ID) of the Open-OMP-Plus da
 - memory_access_count.txt
 - pragma.c: expected pragma annotations
 
-to get these files, you need to put the original code and run the LLVM analysis (get_features.sh)
+To generate these files, place your original code in the appropriate directory and run `get_features.sh`.
+Make sure to verify all paths inside the script are correctly set for your directory structure.
 
 ###### (2) W/loop ID
 
@@ -89,13 +90,12 @@ to get these files, you need to put the original code and run the LLVM analysis 
 
 Steps:
 
-- To get these files, you need to put the original code and code.c. Run run_all.sh and loop_id.py in analysis/match/.
-- After obtaining ID.txt, modify analysis/memory_access/unique.py:
-
-  - Comment out version 1
-  - Uncomment version 2
-- Run get_features.sh
-- Then run extracted_dynamic.py in analysis/dynamic/
+1. Place your original `test.c` and corresponding `code.c` in the desired folder.
+2. Run `run_all.sh` and `loop_id.py` in the `analysis/match/` directory to generate `ID.txt`.
+3. Open `analysis/memory_access/unique.py` and:
+   - Comment out Version 1
+   - Uncomment Version 2
+4. Run `get_features.sh` to generate static and memory features.
 
 #### 2. Generate .json files
 
