@@ -4,8 +4,40 @@ import torch
 from .model import OMPify
 from torch.utils.data import Dataset, random_split
 import numpy as np
+import re
 
-import numpy as np
+import re
+
+def parse_static(static_text: str):
+    """
+    return [ total_instr_cnt, total_load+store_cnt, total_branch_cnt ]
+    """
+    instr_total  = 0
+    load_total   = 0
+    store_total  = 0
+    branch_total = 0
+
+    # Branches
+    regex = re.compile(
+        r"NumInstructions:\s*(\d+).*?"
+        r"-\s*Loads:\s*(\d+).*?"
+        r"-\s*Stores:\s*(\d+).*?"
+        r"-\s*Branches:\s*(\d+)",
+        re.S
+    )
+
+    for m in regex.finditer(static_text):
+        instr_total  += int(m.group(1))
+        load_total   += int(m.group(2))
+        store_total  += int(m.group(3))
+        branch_total += int(m.group(4))
+
+    return [
+        float(instr_total),
+        float(load_total + store_total),
+        float(branch_total)
+    ]
+
 
 def parse_dynamic(dynamic_text):
     """
@@ -100,11 +132,7 @@ def parse_dynamic(dynamic_text):
 
 
 def parse_memory(memory_text):
-    """
-    Return a 2-length vector:
-      0) mean_access: average memory access count.
-      1) max_access: maximum memory access count.
-    """
+    
     if not memory_text:
         return [0.0, 0.0]
     lines = memory_text.splitlines()
@@ -147,6 +175,10 @@ class OMPifyDataset(Dataset):
         # Load the code
         with open(code_path, 'r', errors='ignore') as f:
             code = f.read()
+
+        static_path = sample.get("static_analysis", "")
+        static_text = open(static_path, 'r', errors='ignore').read() if static_path and os.path.exists(static_path) else ""
+        static_features = parse_static(static_text)    
         
         # Load dynamic analysis info (if exists)
         dynamic_path = sample.get("dynamic_analysis", "")
@@ -171,6 +203,15 @@ class OMPifyDataset(Dataset):
         # Parse the dynamic and memory files into feature vectors.
         dyn_features = torch.tensor(parse_dynamic(dynamic_text), dtype=torch.float)
         mem_features = torch.tensor(parse_memory(memory_text), dtype=torch.float)
+
+        # combine
+        static_list = parse_static(static_text) 
+        dyn_list    = parse_dynamic(dynamic_text) 
+        mem_list    = parse_memory(memory_text) 
+
+        feat_list = static_list + dyn_list  
+        numeric_feats  = torch.tensor(feat_list, dtype=torch.float)
+        mem_feats      = torch.tensor(mem_list, dtype=torch.float)    
         
         # Create the target tensor using your labels (defaulting to 0 if missing).
         target = torch.tensor([
@@ -185,8 +226,8 @@ class OMPifyDataset(Dataset):
             "input_ids": input_ids,
             "position_idx": position_idx,
             "attn_mask": attn_mask,
-            "dynamic_features": dyn_features,
-            "memory_features": mem_features
+            "dynamic_features": numeric_feats,
+            "memory_features": mem_feats
         }
         return features, target
 
@@ -228,4 +269,3 @@ def group_split_dataset(dataset, train_ratio=0.8):
         val_indices.extend(groups[key])
     
     return train_indices, val_indices
-
